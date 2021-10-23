@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/mattn/go-zglob v0.0.3
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
-	github.com/shu-go/gli v1.2.0
+	github.com/shu-go/gli v1.3.0
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/api v0.59.0

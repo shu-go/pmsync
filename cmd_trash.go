@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/shu-go/gli"
 	"golang.org/x/xerrors"
@@ -19,7 +20,8 @@ type trashCmd struct {
 
 	Confirm bool `cli:"confirm,i" help:"confirm each deletion" default:"true"`
 
-	Format string `cli:"format,f" default:"{id} {subject} ({date})" help:"{id}, {subject}, {date}, {snippet}, {body}"`
+	Format string      `cli:"format,f" default:"{id} {subject} ({date})" help:"{id}, {subject}, {date}, {snippet}, {body}"`
+	Sort   gli.StrList `cli:"sort" default:"-date,subject,id" help:"sort criteria that is a list of [id, subject, date, snippet] (- means descending order)"`
 }
 
 func (c trashCmd) Run(g globalCmd, args []string) error {
@@ -59,11 +61,13 @@ func (c trashCmd) Run(g globalCmd, args []string) error {
 		}
 	}
 
+	list := make([]listItem, 0, 4)
+
 	// list messages
 	{
-		idset := make(map[string]string)
+		idset := make(map[string]struct{})
 		for _, id := range c.IDs {
-			idset[id] = ""
+			idset[id] = struct{}{}
 		}
 
 		msgService := gmail.NewUsersMessagesService(gmailService)
@@ -75,7 +79,7 @@ func (c trashCmd) Run(g globalCmd, args []string) error {
 				return err
 			}
 			for _, msg := range resp.Messages {
-				idset[msg.Id] = ""
+				idset[msg.Id] = struct{}{}
 			}
 		}
 
@@ -117,11 +121,22 @@ func (c trashCmd) Run(g globalCmd, args []string) error {
 				content = strings.Replace(content, "{body}", string(decoded), -1)
 			}
 
-			idset[id] = content
+			dt, err := time.Parse(time.RFC822Z, getHeader(m.Payload.Headers, "Date"))
+			if err != nil {
+				dt = time.Now()
+			}
+			list = append(list, listItem{
+				Content: content + dt.String(),
+				ID:      m.Id,
+				Subject: getHeader(m.Payload.Headers, "Subject"),
+				Date:    dt,
+				Snippet: m.Snippet,
+			})
 		}
 
-		for id, content := range idset {
-			fmt.Println(content)
+		sortListItems(list, c.Sort)
+		for _, item := range list {
+			fmt.Println(item.Content)
 
 			if c.Confirm {
 				var yesno string
@@ -133,7 +148,7 @@ func (c trashCmd) Run(g globalCmd, args []string) error {
 				}
 			}
 
-			_, err = msgService.Trash(g.UserID, id).Do()
+			_, err = msgService.Trash(g.UserID, item.ID).Do()
 			if err != nil {
 				return err
 			}

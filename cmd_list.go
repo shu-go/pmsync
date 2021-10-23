@@ -5,15 +5,19 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
+	"time"
 
+	"github.com/shu-go/gli"
 	"golang.org/x/xerrors"
 	gmail "google.golang.org/api/gmail/v1"
 	"google.golang.org/api/option"
 )
 
 type listCmd struct {
-	Format string `cli:"format,f" default:"{id} {subject} ({date})" help:"{id}, {subject}, {date}, {snippet}, {body}"`
+	Format string      `cli:"format,f" default:"{id} {subject} ({date})" help:"{id}, {subject}, {date}, {snippet}, {body}"`
+	Sort   gli.StrList `cli:"sort" default:"-date,subject,id" help:"sort criteria that is a list of [id, subject, date, snippet] (- means descending order)"`
 }
 
 func (c listCmd) Run(g globalCmd, args []string) error {
@@ -50,6 +54,8 @@ func (c listCmd) Run(g globalCmd, args []string) error {
 			return fmt.Errorf("Label %q not found", g.Label)
 		}
 	}
+
+	list := make([]listItem, 0, 4)
 
 	// list messages
 	{
@@ -96,9 +102,93 @@ func (c listCmd) Run(g globalCmd, args []string) error {
 				content = strings.Replace(content, "{body}", string(decoded), -1)
 			}
 
-			fmt.Println(content)
+			dt, err := time.Parse(time.RFC822Z, getHeader(m.Payload.Headers, "Date"))
+			if err != nil {
+				dt = time.Now()
+			}
+			list = append(list, listItem{
+				Content: content + dt.String(),
+				ID:      m.Id,
+				Subject: getHeader(m.Payload.Headers, "Subject"),
+				Date:    dt,
+				Snippet: m.Snippet,
+			})
 		}
 	}
 
+	sortListItems(list, c.Sort)
+	for _, item := range list {
+		fmt.Println(item.Content)
+	}
+
 	return nil
+}
+
+// used to collect displaying items
+// list, trash
+type listItem struct {
+	Content string
+
+	ID, Subject, Snippet string
+	Date                 time.Time
+}
+
+func sortListItems(list []listItem, criteria []string) {
+	sort.Slice(list, func(i, j int) bool {
+		for _, c := range criteria {
+			switch strings.ToLower(c) {
+			case "id":
+				if list[i].ID < list[j].ID {
+					return true
+				} else if list[i].ID > list[j].ID {
+					return false
+				}
+			case "-id":
+				if list[j].ID < list[i].ID {
+					return true
+				} else if list[j].ID > list[i].ID {
+					return false
+				}
+			case "subject":
+				if list[i].Subject < list[j].Subject {
+					return true
+				} else if list[i].Subject > list[j].Subject {
+					return false
+				}
+			case "-subject":
+				if list[j].Subject < list[i].Subject {
+					return true
+				} else if list[j].Subject > list[i].Subject {
+					return false
+				}
+			case "date":
+				if list[i].Date.Before(list[j].Date) {
+					return true
+				} else if list[i].Date.After(list[j].Date) {
+					return false
+				}
+			case "-date":
+				if list[j].Date.Before(list[i].Date) {
+					return true
+				} else if list[j].Date.After(list[i].Date) {
+					return false
+				}
+			case "snippet":
+				if list[i].Snippet < list[j].Snippet {
+					return true
+				} else if list[i].Snippet > list[j].Snippet {
+					return false
+				}
+			case "-snippet":
+				if list[j].Snippet < list[i].Snippet {
+					return true
+				} else if list[j].Snippet > list[i].Snippet {
+					return false
+				}
+				//default:
+				//nop
+			}
+		}
+		return false
+	})
 }

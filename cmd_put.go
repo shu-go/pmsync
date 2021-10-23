@@ -120,51 +120,5 @@ func (c putCmd) Run(g globalCmd, args []string) error {
 		}
 	}
 
-	/*
-		// list messages
-		{
-			msgService := gmail.NewUsersMessagesService(gmailService)
-			resp, err := msgService.List(g.UserID).LabelIds(pomeraSync.Id).Q(q).Do()
-			if err != nil {
-				return err
-			}
-			for _, msg := range resp.Messages {
-				//m, err := msgService.Get(c.LoginID, msg.Id).Format("metadata").Do()
-				m, err := msgService.Get(g.UserID, msg.Id).Format("full").Do()
-				if err != nil {
-					return err
-				}
-
-				var content string
-				decoded, err := base64.URLEncoding.DecodeString(m.Payload.Body.Data)
-				if err != nil {
-					println("ERROR: " + err.Error())
-					break //continue
-				}
-				content = string(decoded)
-
-				if c.OutputTarget == "file" {
-					name := c.OutputFormat
-					if strings.Index(c.OutputFormat, "{subject}") != -1 {
-						name = strings.Replace(name, "{subject}", getHeader(m.Payload.Headers, "Subject"), -1)
-					}
-
-					if c.OutputDest != "" {
-						name = filepath.Join(c.OutputDest, name)
-					}
-
-					file, err := os.Create(name)
-					if err != nil {
-						return fmt.Errorf("create %v: %v", name, err)
-					}
-					file.WriteString(content)
-					file.Close()
-				} else {
-					println(content)
-				}
-			}
-		}
-	*/
-
 	return nil
 }

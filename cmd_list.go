@@ -107,7 +107,7 @@ func (c listCmd) Run(g globalCmd, args []string) error {
 				dt = time.Now()
 			}
 			list = append(list, listItem{
-				Content: content + dt.String(),
+				Content: content,
 				ID:      m.Id,
 				Subject: getHeader(m.Payload.Headers, "Subject"),
 				Date:    dt,

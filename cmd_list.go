@@ -127,8 +127,8 @@ func (c listCmd) Run(g globalCmd, args []string) error {
 
 				wg.Done()
 			}(msg)
-			wg.Wait()
 		}
+		wg.Wait()
 	}
 
 	sortListItems(list, c.Sort)

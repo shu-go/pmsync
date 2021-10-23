@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/shu-go/gli"
@@ -83,56 +84,69 @@ func (c trashCmd) Run(g globalCmd, args []string) error {
 			}
 		}
 
+		wg := sync.WaitGroup{}
+		mut := sync.Mutex{}
+
 		for id := range idset {
-			//m, err := msgService.Get(c.LoginID, msg.Id).Format("metadata").Do()
-			m, err := msgService.Get(g.UserID, id).Format("full").Do()
-			if err != nil {
-				return err
-			}
-
-			content := c.Format
-
-			if strings.Index(c.Format, "{id}") != -1 {
-				content = strings.Replace(content, "{id}", id, -1)
-			}
-
-			if strings.Index(c.Format, "{subject}") != -1 {
-				content = strings.Replace(content, "{subject}", getHeader(m.Payload.Headers, "Subject"), -1)
-			}
-
-			if strings.Index(c.Format, "{headers}") != -1 {
-				content = strings.Replace(content, "{headers}", fmt.Sprintf("%#v", m.Payload.Headers), -1)
-			}
-
-			if strings.Index(c.Format, "{date}") != -1 {
-				content = strings.Replace(content, "{date}", getHeader(m.Payload.Headers, "Date"), -1)
-			}
-
-			if strings.Index(c.Format, "{snippet}") != -1 {
-				content = strings.Replace(content, "{snippet}", m.Snippet, -1)
-			}
-
-			if strings.Index(c.Format, "{body}") != -1 {
-				decoded, err := base64.URLEncoding.DecodeString(m.Payload.Body.Data)
+			wg.Add(1)
+			go func(id string) {
+				//m, err := msgService.Get(c.LoginID, msg.Id).Format("metadata").Do()
+				m, err := msgService.Get(g.UserID, id).Format("full").Do()
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
-					break //continue
+					return
 				}
-				content = strings.Replace(content, "{body}", string(decoded), -1)
-			}
 
-			dt, err := time.Parse(time.RFC822Z, getHeader(m.Payload.Headers, "Date"))
-			if err != nil {
-				dt = time.Now()
-			}
-			list = append(list, listItem{
-				Content: content,
-				ID:      m.Id,
-				Subject: getHeader(m.Payload.Headers, "Subject"),
-				Date:    dt,
-				Snippet: m.Snippet,
-			})
+				content := c.Format
+
+				if strings.Index(c.Format, "{id}") != -1 {
+					content = strings.Replace(content, "{id}", id, -1)
+				}
+
+				if strings.Index(c.Format, "{subject}") != -1 {
+					content = strings.Replace(content, "{subject}", getHeader(m.Payload.Headers, "Subject"), -1)
+				}
+
+				if strings.Index(c.Format, "{headers}") != -1 {
+					content = strings.Replace(content, "{headers}", fmt.Sprintf("%#v", m.Payload.Headers), -1)
+				}
+
+				if strings.Index(c.Format, "{date}") != -1 {
+					content = strings.Replace(content, "{date}", getHeader(m.Payload.Headers, "Date"), -1)
+				}
+
+				if strings.Index(c.Format, "{snippet}") != -1 {
+					content = strings.Replace(content, "{snippet}", m.Snippet, -1)
+				}
+
+				if strings.Index(c.Format, "{body}") != -1 {
+					decoded, err := base64.URLEncoding.DecodeString(m.Payload.Body.Data)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+						return
+					}
+					content = strings.Replace(content, "{body}", string(decoded), -1)
+				}
+
+				dt, err := time.Parse(time.RFC822Z, getHeader(m.Payload.Headers, "Date"))
+				if err != nil {
+					dt = time.Now()
+				}
+
+				mut.Lock()
+				list = append(list, listItem{
+					Content: content,
+					ID:      m.Id,
+					Subject: getHeader(m.Payload.Headers, "Subject"),
+					Date:    dt,
+					Snippet: m.Snippet,
+				})
+				mut.Unlock()
+
+				wg.Done()
+			}(id)
 		}
+		wg.Wait()
 
 		sortListItems(list, c.Sort)
 		for _, item := range list {

@@ -80,7 +80,7 @@ func (c getCmd) Run(g globalCmd, args []string) error {
 			var content string
 			decoded, err := base64.URLEncoding.DecodeString(m.Payload.Body.Data)
 			if err != nil {
-				println("ERROR: " + err.Error())
+				fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 				break //continue
 			}
 			content = string(decoded)
@@ -104,7 +104,7 @@ func (c getCmd) Run(g globalCmd, args []string) error {
 				file.WriteString(content)
 				file.Close()
 			} else {
-				println(content)
+				fmt.Println(content)
 			}
 		}
 	}

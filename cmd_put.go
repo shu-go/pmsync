@@ -95,7 +95,7 @@ func (c putCmd) Run(g globalCmd, args []string) error {
 
 			subject := base64.StdEncoding.EncodeToString([]byte(filename[:len(filename)-extlen]))
 			if err != nil {
-				println("ERROR: " + err.Error())
+				fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 				break //continue
 			}
 

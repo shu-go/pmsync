@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strings"
 
 	"golang.org/x/xerrors"
@@ -89,13 +90,13 @@ func (c listCmd) Run(g globalCmd, args []string) error {
 			if strings.Index(c.Format, "{body}") != -1 {
 				decoded, err := base64.URLEncoding.DecodeString(m.Payload.Body.Data)
 				if err != nil {
-					println("ERROR: " + err.Error())
+					fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 					break //continue
 				}
 				content = strings.Replace(content, "{body}", string(decoded), -1)
 			}
 
-			println(content)
+			fmt.Println(content)
 		}
 	}
 

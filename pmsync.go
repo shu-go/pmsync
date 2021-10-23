@@ -36,10 +36,11 @@ type globalCmd struct {
 	ClientID, ClientSecret string `help:"if no credentials.json"`
 	AuthPort               uint16 `cli:"auth-port=NUMBER"  default:"7878"`
 
-	Auth authCmd `help:"update token"`
-	List listCmd `cli:"list,ls" help:"list notes(mail messages)" usage:"args accepts Gmail advanced search syntax (https://support.google.com/mail/answer/7190)"`
-	Get  getCmd  `help:"display or download as a file"`
-	Put  putCmd  `help:"upload files as notes(gmail messages)"`
+	Auth  authCmd  `help:"update token"`
+	List  listCmd  `cli:"list,ls" help:"list notes(mail messages)" usage:"args accepts Gmail advanced search syntax (https://support.google.com/mail/answer/7190)"`
+	Get   getCmd   `help:"display or download as a file"`
+	Put   putCmd   `help:"upload files as notes(gmail messages)"`
+	Trash trashCmd `cli:"trash,rm" help:"send messages to the trash"`
 }
 
 //var scopes = []string{gmail.MailGoogleComScope}

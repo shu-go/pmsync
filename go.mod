@@ -1,6 +1,6 @@
 module github.com/shu-go/pmsync
 
-go 1.17
+go 1.20
 
 require (
 	github.com/mattn/go-zglob v0.0.4
@@ -12,7 +12,6 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/compute v1.19.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect

@@ -42,6 +42,9 @@ func (c getCmd) Run(g globalCmd, args []string) error {
 
 	ctx := context.Background()
 	gmailService, err := gmail.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
+	if err != nil {
+		return xerrors.Errorf("failed to instantiate a gmail service: %v", err)
+	}
 
 	q := strings.Join(args, " ")
 

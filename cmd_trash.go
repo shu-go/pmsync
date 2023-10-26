@@ -43,6 +43,9 @@ func (c trashCmd) Run(g globalCmd, args []string) error {
 
 	ctx := context.Background()
 	gmailService, err := gmail.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
+	if err != nil {
+		return xerrors.Errorf("failed to instantiate a gmail service: %v", err)
+	}
 
 	// check for label Notes/pomera_sync
 	var pomeraSync *gmail.Label

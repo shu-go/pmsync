@@ -104,7 +104,10 @@ func (c getCmd) Run(g globalCmd, args []string) error {
 				if err != nil {
 					return fmt.Errorf("create %v: %v", name, err)
 				}
-				file.WriteString(content)
+				_, err = file.WriteString(content)
+				if err != nil {
+					return fmt.Errorf("create %v: %v", name, err)
+				}
 				file.Close()
 			} else {
 				fmt.Println(content)

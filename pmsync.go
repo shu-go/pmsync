@@ -43,7 +43,7 @@ type globalCmd struct {
 	Trash trashCmd `cli:"trash,rm" help:"send messages to the trash"`
 }
 
-//var scopes = []string{gmail.MailGoogleComScope}
+// var scopes = []string{gmail.MailGoogleComScope}
 var scopes = []string{gmail.GmailLabelsScope, gmail.GmailModifyScope}
 
 func getConfig(credentialsFilePath string, clientID, clientSecret string) (*oauth2.Config, error) {
@@ -147,7 +147,10 @@ func getTokenFromWeb(config *oauth2.Config, port uint16) (*oauth2.Token, error) 
 	// request authorization (and authentication)
 
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	browser.OpenURL(authURL)
+	err := browser.OpenURL(authURL)
+	if err != nil {
+		return nil, err
+	}
 
 	var authCode string
 	authCode = <-codeChan
@@ -210,12 +213,10 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 func saveToken(path string, token *oauth2.Token) error {
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		xerrors.Errorf("failed to cache oauth token: %v", err)
+		return xerrors.Errorf("failed to cache oauth token: %v", err)
 	}
 	defer f.Close()
-	json.NewEncoder(f).Encode(token)
-
-	return nil
+	return json.NewEncoder(f).Encode(token)
 }
 
 func getHeader(headers []*gmail.MessagePartHeader, key string) string {

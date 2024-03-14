@@ -101,18 +101,18 @@ func (c trashCmd) Run(g globalCmd, args []string) error {
 				}
 
 				content := c.Format
-				content = strings.Replace(content, "{id}", id, -1)
+				content = strings.ReplaceAll(content, "{id}", id)
 				if strings.Contains(content, "{subject}") {
-					content = strings.Replace(content, "{subject}", getHeader(m.Payload.Headers, "Subject"), -1)
+					content = strings.ReplaceAll(content, "{subject}", getHeader(m.Payload.Headers, "Subject"))
 				}
 				if strings.Contains(content, "{headers}") {
-					content = strings.Replace(content, "{headers}", fmt.Sprintf("%#v", m.Payload.Headers), -1)
+					content = strings.ReplaceAll(content, "{headers}", fmt.Sprintf("%#v", m.Payload.Headers))
 				}
 				if strings.Contains(content, "{date}") {
-					content = strings.Replace(content, "{date}", getHeader(m.Payload.Headers, "Date"), -1)
+					content = strings.ReplaceAll(content, "{date}", getHeader(m.Payload.Headers, "Date"))
 				}
 				if strings.Contains(content, "{snippet}") {
-					content = strings.Replace(content, "{snippet}", m.Snippet, -1)
+					content = strings.ReplaceAll(content, "{snippet}", m.Snippet)
 				}
 				if strings.Contains(c.Format, "{body}") {
 					decoded, err := base64.URLEncoding.DecodeString(m.Payload.Body.Data)
@@ -120,7 +120,7 @@ func (c trashCmd) Run(g globalCmd, args []string) error {
 						fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 						return
 					}
-					content = strings.Replace(content, "{body}", string(decoded), -1)
+					content = strings.ReplaceAll(content, "{body}", string(decoded))
 				}
 
 				dt, err := time.Parse(time.RFC822Z, getHeader(m.Payload.Headers, "Date"))

@@ -93,7 +93,7 @@ func (c getCmd) Run(g globalCmd, args []string) error {
 
 				name := c.OutputFormat
 				if strings.Contains(c.OutputFormat, "{subject}") {
-					name = strings.Replace(name, "{subject}", getHeader(m.Payload.Headers, "Subject"), -1)
+					name = strings.ReplaceAll(name, "{subject}", getHeader(m.Payload.Headers, "Subject"))
 				}
 
 				if c.OutputDest != "" {

@@ -92,7 +92,7 @@ func (c getCmd) Run(g globalCmd, args []string) error {
 				fmt.Fprintf(os.Stderr, "getting: %v\n", getHeader(m.Payload.Headers, "Subject"))
 
 				name := c.OutputFormat
-				if strings.Index(c.OutputFormat, "{subject}") != -1 {
+				if strings.Contains(c.OutputFormat, "{subject}") {
 					name = strings.Replace(name, "{subject}", getHeader(m.Payload.Headers, "Subject"), -1)
 				}
 

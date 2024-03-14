@@ -83,28 +83,20 @@ func (c listCmd) Run(g globalCmd, args []string) error {
 				}
 
 				content := c.Format
-
-				if strings.Index(c.Format, "{id}") != -1 {
-					content = strings.Replace(content, "{id}", m.Id, -1)
-				}
-
-				if strings.Index(c.Format, "{subject}") != -1 {
+				content = strings.Replace(content, "{id}", m.Id, -1)
+				if strings.Contains(c.Format, "{subject}") {
 					content = strings.Replace(content, "{subject}", getHeader(m.Payload.Headers, "Subject"), -1)
 				}
-
-				if strings.Index(c.Format, "{headers}") != -1 {
+				if strings.Contains(c.Format, "{headers}") {
 					content = strings.Replace(content, "{headers}", fmt.Sprintf("%#v", m.Payload.Headers), -1)
 				}
-
-				if strings.Index(c.Format, "{date}") != -1 {
+				if strings.Contains(c.Format, "{date}") {
 					content = strings.Replace(content, "{date}", getHeader(m.Payload.Headers, "Date"), -1)
 				}
-
-				if strings.Index(c.Format, "{snippet}") != -1 {
+				if strings.Contains(c.Format, "{snippet}") {
 					content = strings.Replace(content, "{snippet}", m.Snippet, -1)
 				}
-
-				if strings.Index(c.Format, "{body}") != -1 {
+				if strings.Contains(c.Format, "{body}") {
 					decoded, err := base64.URLEncoding.DecodeString(m.Payload.Body.Data)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)

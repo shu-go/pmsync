@@ -30,7 +30,7 @@ archives:
   - name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     format_overrides:
       - goos: windows
-        format: zip
+        formats: ['zip']
     files:
       - LICENSE*
       - README*
@@ -39,7 +39,7 @@ release:
 changelog:
   filters:
     exclude:
-    - '^test:'
+      - '^test:'
   groups:
     - title: 'Features'
       regexp: "^.*feat[(\\w)!]*:+.*$"
@@ -49,3 +49,5 @@ changelog:
       order: 1
     - title: 'Others'
       order: 999
+
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj

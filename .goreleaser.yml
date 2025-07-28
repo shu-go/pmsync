@@ -24,7 +24,6 @@ builds:
       - 386
 upx:
   - enabled: true
-    goos: [linux, windows]
     lzma: true
 archives:
   - name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'

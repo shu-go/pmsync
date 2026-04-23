@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/pkg/browser"
 	"github.com/shu-go/gli"
@@ -19,12 +18,6 @@ import (
 
 // Version is app version
 var Version string
-
-func init() {
-	if Version == "" {
-		Version = "dev-" + time.Now().Format("20060102")
-	}
-}
 
 type globalCmd struct {
 	UserID string `cli:"userid" default:"me"`

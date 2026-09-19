@@ -1,6 +1,6 @@
 module github.com/shu-go/pmsync
 
-go 1.26.5
+go 1.27.1
 
 require (
 	github.com/mattn/go-zglob v0.0.6
